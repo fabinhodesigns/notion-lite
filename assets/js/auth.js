@@ -1,10 +1,10 @@
+
 $(document).ready(function() {
 
-    const USUARIOS_KEY = 'notionLiteUsers_db'; // "TABELA DE USUARIOS" localstorage
-    const SESSAO_KEY = 'notionLiteSession'; // Salvar quem está logado
+    const DB_USERS_KEY = 'notionLiteUsers_db'; 
+    const SESSAO_ATIVA_KEY = 'notionLiteSession'; 
 
-    // Pegar os elementos importantes da tela
-    const $btnAcessar = $('#btn-open-login-modal');
+    const $btnAbreLogin = $('#btn-open-login-modal');
     const $menuUsuario = $('#user-menu');
     const $msgBoasVindas = $('#welcome-message');
     const $btnLogout = $('#btn-logout');
@@ -15,7 +15,6 @@ $(document).ready(function() {
     const $registerModal = $('#register-modal');
     const $changePassModal = $('#change-pass-modal');
 
-    // Pegar os botões de confirmação da tela
     const $confirmModal = $('#confirm-modal');
     const $confirmTitle = $('#confirm-title');
     const $confirmMessage = $('#confirm-message');
@@ -23,15 +22,16 @@ $(document).ready(function() {
     const $confirmBtnCancel = $('#confirm-btn-cancel');
     const $confirmIcon = $('#confirm-icon');
 
-    let usuarioAtual = null;
+    let usuarioLogado = null; 
 
-    function getBancoUsuarios() {
-        const usersData = localStorage.getItem(USUARIOS_KEY);
+
+    function carregarBancoUsuarios() {
+        const usersData = localStorage.getItem(DB_USERS_KEY);
         return usersData ? JSON.parse(usersData) : {};
     }
 
-    function saveBancoUsuarios(bancoUsuarios) {
-        localStorage.setItem(USUARIOS_KEY, JSON.stringify(bancoUsuarios));
+    function salvarBancoUsuarios(bancoUsuarios) {
+        localStorage.setItem(DB_USERS_KEY, JSON.stringify(bancoUsuarios));
     }
 
     /**
@@ -41,16 +41,13 @@ $(document).ready(function() {
      * @param {string} type - 'info' (azul) ou 'danger' (vermelho)
      * @param {function} onConfirm - A função "callback" que roda se o user clicar OK
      */
-
     function showConfirmModal(title, message, type = 'info', onConfirm) {
         $confirmTitle.text(title);
         $confirmMessage.text(message);
 
-        // Limpa classes tipo pra não dar erro 
         $confirmIcon.removeClass('info danger');
         $confirmBtnOk.removeClass('btn-modal-danger btn-modal-primary');
 
-        // Adiciona novas classes de tipo
         if (type === 'danger') {
             $confirmIcon.addClass('danger');
             $confirmBtnOk.addClass('btn-modal-danger').text('Excluir');
@@ -60,7 +57,7 @@ $(document).ready(function() {
         }
         
         $confirmBtnOk.off('click').on('click', function() {
-            onConfirm(); // Executa a ação
+            onConfirm();
             hideModais();
         });
         
@@ -68,8 +65,6 @@ $(document).ready(function() {
         
         showModal($confirmModal);
     }
-
-    // MODAIS HTML
 
     function showModal(modal) {
         $modalOverlay.removeClass('hidden');
@@ -81,29 +76,23 @@ $(document).ready(function() {
         $('.modal').addClass('hidden');
     }
 
-    // Fechar modais
-    $btnAcessar.on('click', () => showModal($loginModal));
+    $btnAbreLogin.on('click', () => showModal($loginModal));
     $btnMudarSenha.on('click', () => showModal($changePassModal));
 
-    // Fecha clicando fora do modal
     $modalOverlay.on('click', hideModais);
     
-    // Troca do modal de login pro de registro
     $('#switch-to-register').on('click', (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
         hideModais();
         showModal($registerModal);
     });
-    // Troca do modal de registro pro de login
+
     $('#switch-to-login').on('click', (e) => {
         e.preventDefault();
         hideModais();
         showModal($loginModal);
     });
 
-    /**
-     * REGISTRO
-     */
     $('#register-form').on('submit', function(e) {
         e.preventDefault();
         const username = $('#register-username').val();
@@ -113,47 +102,44 @@ $(document).ready(function() {
             NoteApp.showToast('Nome de usuário inválido (não use espaços).', 'error');
             return;
         }
+        
+        if (password.length < 4) {
+             NoteApp.showToast('Senha muito fraca (mín. 4 chars).', 'error');
+            return;
+        }
 
-        const bancoUsuarios = getBancoUsuarios();
+        const bancoUsuarios = carregarBancoUsuarios();
 
         if (bancoUsuarios[username]) {
             NoteApp.showToast('Este nome de usuário já existe.', 'error');
         } else {
-            // Salva o usuário novo
-            bancoUsuarios[username] = password; // ATENÇÃO: Salvando senha em texto
-            saveBancoUsuarios(bancoUsuarios);
+            bancoUsuarios[username] = password; 
+            salvarBancoUsuarios(bancoUsuarios);
             
             NoteApp.showToast('Conta criada com sucesso! Faça o login.', 'success');
             hideModais();
-            showModal($loginModal); // Manda pro login
+            showModal($loginModal); 
         }
     });
 
-    /**
-     * LOGIN
-     */
     $('#login-form').on('submit', function(e) {
         e.preventDefault();
         const username = $('#login-username').val();
         const password = $('#login-password').val();
         
-        const bancoUsuarios = getBancoUsuarios();
+        const bancoUsuarios = carregarBancoUsuarios();
 
-        // Verifica a existencia do usuário e se a senha é igual
         if (bancoUsuarios[username] && bancoUsuarios[username] === password) {
             
-            // Helper pra logar
-            const performLogin = () => {
-                sessionStorage.setItem(SESSAO_KEY, username); // Salva na sessão
+            const logarUsuario = () => {
+                sessionStorage.setItem(SESSAO_ATIVA_KEY, username); 
                 NoteApp.showToast(`Bem-vindo, ${username}!`, 'success');
                 
-                // 1s pro usuário ler o "Bem-vindo" antes de recarregar a página
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
             };
 
-            // Verifica se o usuário anonimo tinha notas
             if (NoteApp.hasAnonymousNotes()) {
                 showConfirmModal(
                     'Aviso de Login',
@@ -162,11 +148,11 @@ $(document).ready(function() {
                     function() {
                         console.warn('[Auth] Usuário confirmou. Deletando notas anônimas...');
                         NoteApp.deleteAnonymousNotes();
-                        performLogin();
+                        logarUsuario();
                     }
                 );
             } else {
-                performLogin();
+                logarUsuario();
             }
             
         } else {
@@ -175,63 +161,62 @@ $(document).ready(function() {
     });
 
     $btnLogout.on('click', function() {
-        sessionStorage.removeItem(SESSAO_KEY); // Limpa a sessão
-        location.reload(); // Recarrega a página (volta a ser anônimo)
+        sessionStorage.removeItem(SESSAO_ATIVA_KEY); 
+        location.reload(); 
     });
 
-    /**
-     * MUDAR SENHA
-     */
     $('#change-pass-form').on('submit', function(e) {
         e.preventDefault();
         const oldPassword = $('#change-old-password').val();
         const newPassword = $('#change-new-password').val();
         const confirmPassword = $('#change-confirm-password').val();
 
+        if (newPassword.length < 4) {
+             NoteApp.showToast('Senha nova muito fraca (mín. 4 chars).', 'error');
+            return;
+        }
+
         if (newPassword !== confirmPassword) {
             NoteApp.showToast('As novas senhas não coincidem.', 'error');
             return;
         }
 
-        const bancoUsuarios = getBancoUsuarios();
+        const bancoUsuarios = carregarBancoUsuarios();
         
-        // Verificar senha antiga
-        if (bancoUsuarios[usuarioAtual] && bancoUsuarios[usuarioAtual] === oldPassword) {
-            // Atualiza a senha
-            bancoUsuarios[usuarioAtual] = newPassword;
-            saveBancoUsuarios(bancoUsuarios);
+        if (bancoUsuarios[usuarioLogado] && bancoUsuarios[usuarioLogado] === oldPassword) {
+            bancoUsuarios[usuarioLogado] = newPassword;
+            salvarBancoUsuarios(bancoUsuarios);
             
             NoteApp.showToast('Senha alterada com sucesso!', 'success');
             hideModais();
-            $(this)[0].reset(); // Limpa o formulário
+            $(this)[0].reset(); 
         } else {
             NoteApp.showToast('A senha antiga está incorreta.', 'error');
         }
     });
 
 
-
-    // INICIO APLICAÇÃO
     function initApp() {
-        // Verifica usuario logado
-        usuarioAtual = sessionStorage.getItem(SESSAO_KEY);
+        console.log("Iniciando App...");
+        usuarioLogado = sessionStorage.getItem(SESSAO_ATIVA_KEY);
 
-        // Atualiza html (mostra "Acessar" ou "Olá, Usuario")
-        if (usuarioAtual) {
-            $btnAcessar.addClass('hidden');
+        if (usuarioLogado) {
+            $btnAbreLogin.addClass('hidden');
             $menuUsuario.removeClass('hidden');
-            $msgBoasVindas.text(`Olá, ${usuarioAtual}`);
+            $msgBoasVindas.text(`Olá, ${usuarioLogado}`);
         } else {
-            $btnAcessar.removeClass('hidden');
+            $btnAbreLogin.removeClass('hidden');
             $menuUsuario.addClass('hidden');
         }
 
+        // Isso é a "ponte" que deixa o notes.js chamar o modal do auth.js
         NoteApp.initNoteEvents(showConfirmModal);
 
-        // carrega as notas do usuário atual ou anonimas
-        NoteApp.loadNotesFromStorage(usuarioAtual);
+        // 4. Carrega as notas certas (do user atual ou as anônimas)
+        NoteApp.loadNotesFromStorage(usuarioLogado);
     }
 
+    // Roda a aplicação
     initApp();
 
 });
