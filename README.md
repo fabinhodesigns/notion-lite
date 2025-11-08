@@ -1,51 +1,46 @@
-# Projeto Final de TI — Gerenciador de Produtos (Front-end)
+# Notion Lite
 
-Este projeto é um front-end desenvolvido em **HTML, CSS, JavaScript (com jQuery)** e **Bootstrap 5** que consome uma API de teste (DummyJSON) para realizar operações de CRUD (Create, Read, Update, Delete).
+Um app simples de anotações rápidas feito com JavaScript (jQuery) e HTML/CSS.
 
-O foco do projeto é demonstrar o uso correto de requisições HTTP (Fetch/AJAX), manipulação de rotas/filtros, tratamento de status codes e feedback visual ao usuário.
-
-## 🎯 Objetivo
-
-Desenvolver um front-end que realize as operações GET, POST, PUT e DELETE, consumindo um backend de teste (DummyJSON).
-
----
+Tudo funciona 100% local no seu navegador, usando o `localStorage` para salvar tanto as notas quanto as contas de usuário.
 
 ## 🚀 Como Executar
 
-1.  Clone ou baixe este repositório.
-2.  Como este é um projeto de front-end puro (HTML/JS/CSS), você **não precisa** de um servidor complexo.
-3.  Basta abrir o arquivo `index.html` diretamente no seu navegador de preferência (Google Chrome, Firefox, etc.).
+1.  Abra a pasta do app no VS Code.
+2.  Tenha a extensão "Live Server" instalada.
+3.  Clique com o botão direito no `index.html` e escolha "Open with Live Server".
 
----
+## ⚙️ Como Funciona
 
-## ⚙️ Endpoints da API Utilizados (DummyJSON)
+A lógica do app é separada por usuário, usando o `localStorage` como um pequeno banco de dados.
 
-O projeto está configurado para usar a API [DummyJSON](https://dummyjson.com/docs/products).
+### 1. Modo Anônimo
 
-* **GET (Listar Todos):** `GET https://dummyjson.com/products`
-* **GET (Filtrar/Buscar):** `GET https://dummyjson.com/products/search?q=[termo]`
-* **GET (Buscar por ID):** `GET https://dummyjson.com/products/[id]`
-* **POST (Criar):** `POST https://dummyjson.com/products/add`
-* **PUT (Atualizar):** `PUT https://dummyjson.com/products/[id]`
-* **DELETE (Excluir):** `DELETE https://dummyjson.com/products/[id]`
+* Ao abrir, você pode criar, editar e excluir notas sem estar logado.
+* Essas notas são salvas numa "gaveta" especial para usuários anônimos (`Notas Anonimas`). Elas ficam salvas mesmo se você fechar o navegador.
 
----
+### 2. Autenticação
 
-## ✅ Checklist de Entrega
+* Ao clicar em **"Acessar"**, você pode logar ou se cadastrar.
+* As contas (usuário/senha) são salvas localmente. O sistema não deixa criar dois usuários com o mesmo nome.
+* **Aviso Importante:** Se você tem notas no modo anônimo e decide logar, um aviso aparece. Ele informa que, ao logar, suas notas anônimas serão **apagadas** para dar lugar às notas da sua conta.
+* **Troca de Usuário:** Cada usuário logado tem sua própria "gaveta" de notas (ex: `notes_usuario1`). Se você deslogar e outro usuário logar, as notas são trocadas. Cada um só vê o que é seu.
+* **Logout:** Ao sair, o app recarrega e volta para o modo anônimo.
 
-Este projeto cumpre os seguintes requisitos:
+## 📋 Funcionalidades Implementadas
 
--   [x] Repositório público com README (este arquivo).
--   [x] CRUD completo: GET / POST / PUT / DELETE funcionando.
--   [x] Rotas e filtros por URL implementados.
-    -   *Rotas:* O `GET`, `PUT` e `DELETE` usam o parâmetro `/products/:id` na URL.
-    -   *Filtros:* A barra de busca implementa o filtro `?q=...` na URL da API.
--   [x] Tratamento de status codes e mensagens ao usuário.
-    -   *Sucesso:* Alertas verdes são mostrados para status 200 (OK), 201 (Created).
-    -   *Erro:* Alertas vermelhos são mostrados para status 4xx e 5xx, informando o código do erro.
--   [x] Loading e feedbacks de erro.
-    -   *Loading:* Um spinner é exibido enquanto as requisições (GET) estão em andamento.
-    -   *Feedback:* O botão "Salvar" do formulário exibe um spinner e fica desabilitado durante o envio (POST/PUT).
--   [x] README com endpoints e instruções de execução (este arquivo).
+* **CRUD (POST, GET, PUT, DELETE):** Todas as operações são simuladas localmente.
+    * **`saveNote()`** (Simula POST/PUT): Cria ou atualiza a nota no `localStorage`.
+    * **`deleteNote()`** (Simula DELETE): Remove a nota do `localStorage`.
+    * **`loadNotesFromStorage()`** (Simula GET): Lê as notas do `localStorage` para mostrar na tela.
 
----
+* **Filtros:** A barra de busca funciona **em tempo real**, filtrando as notas *locais* (título ou corpo) enquanto você digita.
+
+* **Feedbacks Visuais:**
+    * O app não usa alertas padrão do navegador.
+    * **Toasts Modernos:** Notificações (estilo banner) deslizam do topo para dar feedback de sucesso (verde) ou erro (vermelho).
+    * **Modais Customizados:** Alertas de confirmação (como o de "Excluir" ou o "Aviso de Login") são modais customizados que usam `backdrop-filter: blur()` para um visual mais limpo.
+
+* **Autenticação:**
+    * O sistema usa `sessionStorage` para manter o usuário logado (similar a um token de sessão).
+    * Inclui as rotinas de **Login**, **Cadastro** e **Alteração de Senha** (verificando a senha antiga).
