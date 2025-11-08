@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion Lite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div id="toast-container"></div>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div>
+                <div class="sidebar-header">
+                    <img src="assets/img/logo.png" alt="Logo" class="logo">
+                    <h3>Notion Lite</h3>
+                </div>
+
+                <button class="btn-new-note" id="btn-new-note">
+                    <i class="bi bi-plus-lg"></i> Nova Nota
+                </button>
+
+                <div class="search-bar">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="search-input" placeholder="Buscar na API (Enter)...">
+                </div>
+
+                <ul id="note-list">
+                </ul>
+            </div>
+
+            <div>
+                <div id="sidebar-loading" class="loading-feedback" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Carregando...</span>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div id="user-menu" class="hidden">
+                        <span id="welcome-message"></span>
+                        <button class="btn-sidebar-footer" id="btn-change-pass">Mudar Senha</button>
+                        <button class="btn-sidebar-footer btn-logout" id="btn-logout">
+                            Sair <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </div>
+                    <button class="btn-sidebar-footer btn-login" id="btn-open-login-modal">
+                        Acessar <i class="bi bi-person-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <div id="placeholder" class="placeholder-container">
+                <i class="bi bi-journal-text"></i>
+                <h2>Selecione uma nota ou crie uma nova</h2>
+                <p>Suas notas são salvas localmente no navegador.</p>
+            </div>
+
+            <div id="editor-container" class="hidden">
+                <div class="editor-actions">
+                    <button class="btn-save" id="btn-save">
+                        <span class="spinner-border spinner-border-sm" style="display: none;"></span>
+                        <i class="bi bi-save"></i> Salvar
+                    </button>
+                    <button class="btn-delete" id="btn-delete">
+                        <i class="bi bi-trash3"></i> Excluir
+                    </button>
+                </div>
+
+                <input type="text" id="note-title" class="note-title-input" placeholder="Título da sua nota...">
+                <textarea id="note-body" class="note-body-textarea"
+                    placeholder="Comece a escrever sua nota..."></textarea>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay hidden" id="modal-overlay"></div>
+
+    <div class="modal hidden" id="login-modal">
+        <h2>Acessar sua conta</h2>
+        <form id="login-form">
+            <label for="login-username">Nome de usuário</label>
+            <input type="text" id="login-username" required>
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" required>
+            <button type="submit" class="btn-modal-primary">Entrar</button>
+        </form>
+        <p class="modal-switch">Não tem uma conta? <a href="#" id="switch-to-register">Cadastre-se</a></p>
+    </div>
+
+    <div class="modal hidden" id="register-modal">
+        <h2>Criar nova conta</h2>
+        <form id="register-form">
+            <label for="register-username">Nome de usuário (sem espaços)</label>
+            <input type="text" id="register-username" pattern="^\S*$" required>
+            <label for="register-password">Senha</label>
+            <input type="password" id="register-password" required>
+            <button type="submit" class="btn-modal-primary">Criar conta</button>
+        </form>
+        <p class="modal-switch">Já tem uma conta? <a href="#" id="switch-to-login">Acessar</a></p>
+    </div>
+
+    <div class="modal hidden" id="change-pass-modal">
+        <h2>Alterar Senha</h2>
+        <form id="change-pass-form">
+            <label for="change-old-password">Senha Antiga</label>
+            <input type="password" id="change-old-password" required>
+            <label for="change-new-password">Nova Senha</label>
+            <input type="password" id="change-new-password" required>
+            <label for="change-confirm-password">Confirmar Nova Senha</label>
+            <input type="password" id="change-confirm-password" required>
+            <button type="submit" class="btn-modal-primary">Salvar Nova Senha</button>
+        </form>
+    </div>
+
+    <div class="modal hidden" id="confirm-modal">
+        <div id="confirm-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <h2 id="confirm-title">Você tem certeza?</h2>
+        <p id="confirm-message">Esta ação não pode ser desfeita.</p>
+        <div class="modal-actions">
+            <button class="btn-modal-secondary" id="confirm-btn-cancel">Cancelar</button>
+            <button class="btn-modal-danger" id="confirm-btn-ok">Confirmar</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/notes.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
