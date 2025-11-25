@@ -146,6 +146,8 @@ $(document).ready(function () {
             return;
         }
 
+        console.info('[Auth][LOGIN] Tentativa de login iniciada', { username });
+
         const bancoUsuarios = carregarBancoUsuarios();
         if (bancoUsuarios[username] && bancoUsuarios[username] === password) {
             const profile = { username, userId: 1 };
@@ -156,6 +158,7 @@ $(document).ready(function () {
             localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
             usuarioLogado = profile.username;
             loginObrigatorio = false;
+            console.info('[Auth][LOGIN][LOCAL] Usuario autenticado localmente', { username: usuarioLogado });
             NoteApp.showToast(`Bem-vindo, ${usuarioLogado}!`, 'success');
             hideModais(true);
             aplicarEstadoLogado(profile);
@@ -166,6 +169,7 @@ $(document).ready(function () {
     });
 
     $btnLogout.on('click', function () {
+        console.info('[Auth][LOGOUT] Usuario encerrou a sessao', { username: usuarioLogado });
         sessionStorage.removeItem(SESSAO_ATIVA_KEY);
         sessionStorage.removeItem('notionLiteUserId');
         localStorage.removeItem(USER_PROFILE_KEY);
@@ -207,6 +211,7 @@ $(document).ready(function () {
     async function autenticarNoBackend(username, password) {
         try {
             $loginModal.addClass('loading');
+            console.info('[Auth][POST] Autenticando no backend DummyJSON', { username });
             const response = await fetch(AUTH_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -234,6 +239,7 @@ $(document).ready(function () {
 
             usuarioLogado = profile.username;
             loginObrigatorio = false;
+            console.info('[Auth][POST] Login no backend bem-sucedido', { username: usuarioLogado, userId: profile.userId });
 
             NoteApp.showToast(`Bem-vindo, ${usuarioLogado}!`, 'success');
             hideModais();
